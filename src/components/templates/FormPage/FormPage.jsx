@@ -1,10 +1,16 @@
-import { useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
 import { InputFile } from '../../atoms/InputFile/InputFile';
 import { InputText } from '../../atoms/InputText/InputText';
 import { TextArea } from '../../atoms/TextArea/TextArea';
 import styles from './FormPage.module.scss';
-import { useDispatch } from 'react-redux';
-import { addSongThunk } from '../../../store/actions';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  addSongThunk,
+  getSongThunk,
+  updateSongThunk,
+} from '../../../store/actions';
+import { useHistory, useParams } from 'react-router-dom';
+import { getTargetSongSelector } from '../../../store/selectors';
 
 const FORM_ACTION_TYPES = {
   CREATE_SONG: 'CREATE_SONG',
@@ -14,6 +20,7 @@ const FORM_ACTION_TYPES = {
   CREATE_COUNTRY: 'CREATE_COUNTRY',
   CREATE_CITY: 'CREATE_CITY',
   RESET: 'RESET',
+  LOAD: 'LOAD',
 };
 
 const initFormState = {
@@ -23,6 +30,7 @@ const initFormState = {
   photo: '',
   country: '',
   city: '',
+  photoPreview: '',
 };
 
 const reducer = (state, action) => {
@@ -44,7 +52,14 @@ const reducer = (state, action) => {
   } else if (action.type === FORM_ACTION_TYPES.ADD_PHOTO) {
     return {
       ...state,
-      photo: action.payload,
+      photo: action.payload.formData,
+      photoPreview: action.payload.previewUrl,
+    };
+  } else if (action.type === FORM_ACTION_TYPES.REMOVE_PHOTO) {
+    return {
+      ...state,
+      photo: '',
+      photoPreview: '',
     };
   } else if (action.type === FORM_ACTION_TYPES.CREATE_COUNTRY) {
     return {
@@ -58,6 +73,8 @@ const reducer = (state, action) => {
     };
   } else if (action.type === FORM_ACTION_TYPES.RESET) {
     return initFormState;
+  } else if (action.type === FORM_ACTION_TYPES.LOAD) {
+    return action.payload;
   }
 
   return state;
@@ -67,30 +84,73 @@ export const FormPage = () => {
   const [state, dispatch] = useReducer(reducer, initFormState);
 
   const reduxDispatch = useDispatch();
+  const history = useHistory();
+  const { id } = useParams();
+  const targetSong = useSelector(getTargetSongSelector);
+
+  useEffect(() => {
+    if (id) {
+      reduxDispatch(getSongThunk(id));
+    }
+  }, [id, reduxDispatch]);
+
+  useEffect(() => {
+    if (!id || !targetSong.id || `${targetSong.id}` !== `${id}`) return;
+
+    const [country = '', city = ''] = (targetSong.location || '').split(' ');
+
+    dispatch({
+      type: FORM_ACTION_TYPES.LOAD,
+      payload: {
+        song: targetSong.name,
+        band: targetSong.band,
+        details: targetSong.details,
+        photo: targetSong.photo,
+        photoPreview: targetSong.photo,
+        country,
+        city,
+      },
+    });
+  }, [id, targetSong]);
 
   const handleSubmitForm = async (event) => {
     event.preventDefault();
 
-    await reduxDispatch(addSongThunk(state));
+    if (id) {
+      await reduxDispatch(updateSongThunk(id, state));
+    } else {
+      await reduxDispatch(addSongThunk(state));
+    }
 
     dispatch({ type: FORM_ACTION_TYPES.RESET });
+    history.push('/songs');
   };
 
   const handleChangeInput = (event) => {
     if (event.target.name === FORM_ACTION_TYPES.ADD_PHOTO) {
       const formData = new FormData();
+      const file = event.target.files[0];
 
-      formData.append('filename', event.target.files[0]);
+      if (!file) return;
+
+      formData.append('filename', file);
 
       dispatch({
         type: event.target.name,
-        payload: formData,
+        payload: {
+          formData,
+          previewUrl: URL.createObjectURL(file),
+        },
       });
 
       return;
     }
 
     dispatch({ type: event.target.name, payload: event.target.value });
+  };
+
+  const handleRemovePhoto = () => {
+    dispatch({ type: FORM_ACTION_TYPES.REMOVE_PHOTO });
   };
 
   return (
@@ -100,7 +160,7 @@ export const FormPage = () => {
       encType="multipart/form-data"
     >
       <fieldset className={styles.wrapper}>
-        <legend>Add new item</legend>
+        <legend>{id ? 'Edit item' : 'Add new item'}</legend>
         <label>
           <InputText
             title="Band name"
@@ -141,7 +201,8 @@ export const FormPage = () => {
           name={FORM_ACTION_TYPES.ADD_PHOTO}
           accept="image/*"
           onChange={handleChangeInput}
-          value={state.photo}
+          previewUrl={state.photoPreview}
+          onRemove={handleRemovePhoto}
         />
         <label>
           <TextArea
@@ -152,7 +213,7 @@ export const FormPage = () => {
             required
           />
         </label>
-        <button type="submit">Confirm</button>
+        <button type="submit">{id ? 'Save' : 'Confirm'}</button>
       </fieldset>
     </form>
   );

@@ -5,24 +5,38 @@
   cursor: pointer;
   text-align: center;
   margin: 20px 0;
-  max-width: 240px;
-  border-radius: 4px;
-  background-color: $primary;
-  color: $white;
+
+  .inputFile {
+    border-radius: 4px;
+    background-color: $primary;
+    color: $white;
+
+    &:hover {
+      background-color: $gray-2;
+      color: $black;
+    }
+  }
+
+  span {
+    padding: 0 20px;
+    margin: 4px;
+  }
+
 
   input {
-    width: 100%;
+    width: 0;
     opacity: 0;
     padding: 10px;
     margin: 0;
   }
 
-  span {
-    display: inline-block;
-    height: 90%;
-    position: absolute;
-    padding: 0 20px;
+  label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
+
+
 
   .icon {
     top: 2px;
@@ -42,13 +56,48 @@
     right: 0;
   }
 
-  &:hover {
-    background-color: $gray-2;
-    color: $black;
+  .previewWrapper {
+    position: relative;
+    display: inline-block;
+    width: clamp(180px, 60vw, 360px);
+    max-width: 100%;
+    aspect-ratio: 4 / 3;
+    margin-top: 8px;
+    overflow: hidden;
+    border-radius: 4px;
+  }
 
-    .icon {
-      margin: 0 1px;
-      box-shadow: inset 0 0 2px 1px $black;
+  .preview {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 180ms ease;
+  }
+
+  .removePreview {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    line-height: 8px;
+    width: 26px;
+    height: 26px;
+    color: $white;
+    background-color: rgba($black, 0.3);
+
+    &:hover,
+    &:focus {
+      background-color: $primary;
+    }
+  }
+
+  &.ready {
+    .title {
+      display: none;
+    }
+
+    .title_ready {
+      display: block;
     }
   }
 }

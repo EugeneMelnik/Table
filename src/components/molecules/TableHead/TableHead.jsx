@@ -83,7 +83,7 @@ export const TableHead = ({ setSelectedRows, selectedRows }) => {
             sort={handleClickSortList}
           />
         </th>
-        <th>Action</th>
+        <th>Actions</th>
       </tr>
     </thead>
   );

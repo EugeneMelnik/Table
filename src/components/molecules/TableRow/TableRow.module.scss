@@ -18,4 +18,26 @@
     cursor: pointer;
     text-decoration: underline;
   }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 100%;
+  }
+
+  .iconButton {
+    width: 38px;
+    height: 38px;
+    color: $primary;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 1.6rem;
+
+    &:hover,
+    &:focus {
+      border-color: $primary;
+      outline: none;
+    }
+  }
 }

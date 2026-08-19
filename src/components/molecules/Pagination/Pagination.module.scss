@@ -44,10 +44,10 @@ form {
     display: flex;
   }
 
-  input[type="number"] {
+  select {
     margin-left: 6px;
-    width: 50px;
+    min-width: 52px;
     height: 22px;
-    text-align: right;
   }
 }
+

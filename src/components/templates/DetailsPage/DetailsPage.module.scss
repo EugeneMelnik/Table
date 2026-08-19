@@ -1,8 +1,17 @@
+@import '../../../style/colors';
+
 .wrapper {
   min-width: 400px;
+  padding: 1.5rem;
+  border: 1px solid $gray-2;
+  border-radius: 4px;
+  overflow: hidden;
 
   .head {
     padding-bottom: 1rem;
+    border-bottom: 1px solid $gray-2;
+    margin-bottom: 1rem;
+    position: relative;
 
     * {
       margin-top: 0.4rem;
@@ -10,8 +19,39 @@
     }
   }
 
+  .actions {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .iconButton {
+    width: 30px;
+    height: 30px;
+    color: $primary;
+    border: 1px solid $gray-2;
+    border-radius: 4px;
+    font-size: 1.1rem;
+
+    &:hover,
+    &:focus {
+      border-color: $primary;
+      outline: none;
+    }
+  }
+
   & > img {
     float: right;
     width: 40%;
+    max-height: 320px;
+    object-fit: contain;
+    margin: 0 0 1rem 1.5rem;
+  }
+
+  & > p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
   }
 }
