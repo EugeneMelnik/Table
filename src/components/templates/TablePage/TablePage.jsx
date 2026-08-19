@@ -13,8 +13,13 @@ import styles from './TablePage.module.scss';
 
 export const TablePage = () => {
   const [selectedRows, setSelectedRows] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [limitItemsPerPage, setLimitItemsPerPage] = useState(0);
+  const { search } = useLocation();
+  const searchParams = new URLSearchParams(search);
+  const initialPage = Number(searchParams.get('page')) || 1;
+  const initialLimit = Number(searchParams.get('limit')) || 20;
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [limitItemsPerPage, setLimitItemsPerPage] = useState(initialLimit);
+  const songs = useSelector((state) => state.reducer.songs);
 
   const allSongsCount = useSelector(getAllSongsCountSelector);
 
@@ -22,54 +27,22 @@ export const TablePage = () => {
 
   const history = useHistory();
 
-  const { search } = useLocation();
-
-  const searchParams = new URLSearchParams(search);
-
-  const page = +searchParams.get('page');
-  const limit = +searchParams.get('limit');
-
   useEffect(() => {
     setSelectedRows([]);
-
-    if (page && limit) {
-      setCurrentPage(page);
-
-      setLimitItemsPerPage(limit);
-
-      return;
-    }
-
-    if (!allSongsCount) {
-      dispatch(getSongsThunk(currentPage, limitItemsPerPage));
-
-      return;
-    }
-
-    setLimitItemsPerPage(allSongsCount);
-    setCurrentPage(1);
 
     history.push({
       pathname: ROUTES.songs,
-      search: `?page=1&limit=${allSongsCount}`,
+      search: `?page=${currentPage}&limit=${limitItemsPerPage}`,
     });
-  }, [page, limit, allSongsCount]);
-
-  useEffect(() => {
-    setSelectedRows([]);
-
-    if (currentPage && limitItemsPerPage) {
-      history.push({
-        pathname: ROUTES.songs,
-        search: `?page=${currentPage}&limit=${limitItemsPerPage}`,
-      });
-
-      dispatch(getSongsThunk(currentPage, limitItemsPerPage));
-    }
-  }, [currentPage, limitItemsPerPage]);
+    dispatch(getSongsThunk(currentPage, limitItemsPerPage));
+  }, [currentPage, limitItemsPerPage, dispatch, history]);
 
   const handleClickDeleteSelectedRows = () => {
-    dispatch(deleteSongsThunk(selectedRows));
+    dispatch(
+      deleteSongsThunk(
+        selectedRows.map((id) => songs.find((song) => song.id === id))
+      )
+    );
   };
 
   const handleSelectRow = (id) => {
@@ -93,12 +66,12 @@ export const TablePage = () => {
       )}
       <table>
         <colgroup>
-          <col width="30" />
-          <col width="40%" />
-          <col width="20%" />
-          <col width="150" />
-          <col width="15%" />
-          <col width="74" />
+          <col />
+          <col />
+          <col />
+          <col />
+          <col />
+          <col />
         </colgroup>
         <TableHead
           setSelectedRows={setSelectedRows}

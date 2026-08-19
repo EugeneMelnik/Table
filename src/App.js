@@ -28,7 +28,8 @@ function App() {
               <Redirect to={ROUTES.songs} />
             </Route>
             <Route exact path={ROUTES.songs} component={TablePage} />
-            <Route path={ROUTES.addSong} component={FormPage} />
+            <Route path={`${ROUTES.addSong}/:id`} component={FormPage} />
+            <Route exact path={ROUTES.addSong} component={FormPage} />
             <Route path={ROUTES.song} component={DetailsPage} />
           </Switch>
         </div>

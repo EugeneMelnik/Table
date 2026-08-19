@@ -103,25 +103,62 @@ export const addSongThunk = (song) => async (dispatch) => {
   }
 };
 
-export const setSongRatingThunk = (id, rating) => async (dispatch) => {
+export const updateSongThunk = (id, song) => async (dispatch) => {
   try {
     dispatch(setIsLoading(true));
 
+    let photo = song.photo;
+
+    if (song.photo instanceof FormData) {
+      const {
+        data: { url },
+      } = await axiosFileInstance.post(API.postPhoto, song.photo);
+
+      photo = url;
+    }
+
     await axiosInstance.put(`${API.update}/${id}`, {
-      rating,
+      name: song.song,
+      band: song.band,
+      details: song.details,
+      photo,
+      location: `${song.country} ${song.city}`.trim(),
     });
 
-    dispatch(setSongRating({ id, rating }));
-
-    toast.success('rating is set');
+    toast.success(`Updated "${song.song}".`);
   } catch (error) {
-    toast(error);
+    toast.error(error);
   } finally {
     dispatch(setIsLoading(false));
   }
 };
 
-export const deleteSongsThunk = (ids) => async (dispatch) => {
+export const setSongRatingThunk =
+  (id, rating, songName) => async (dispatch) => {
+    try {
+      dispatch(setIsLoading(true));
+
+      await axiosInstance.put(`${API.update}/${id}`, {
+        rating,
+      });
+
+      dispatch(setSongRating({ id, rating }));
+
+      toast.success(`Rating ${rating}/5 set for "${songName}".`);
+    } catch (error) {
+      toast(error);
+    } finally {
+      dispatch(setIsLoading(false));
+    }
+  };
+
+export const deleteSongsThunk = (songsOrIds) => async (dispatch) => {
+  const songs = songsOrIds.map((songOrId) =>
+    typeof songOrId === 'object' ? songOrId : { id: songOrId }
+  );
+  const ids = songs.map((song) => song.id);
+  const songNames = songs.map((song) => song.name || `#${song.id}`);
+
   try {
     dispatch(setIsLoading(true));
 
@@ -131,7 +168,7 @@ export const deleteSongsThunk = (ids) => async (dispatch) => {
 
     dispatch(deleteSongs(ids));
 
-    toast.success('deleted!');
+    toast.success(`Deleted: ${songNames.join(', ')}.`);
   } catch (error) {
     toast.error(error);
   } finally {

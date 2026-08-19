@@ -1,6 +1,7 @@
 @import '../../../style/colors';
 
 .wrapper {
+  height: 100%;
   max-height: 100%;
 
   & > button {
@@ -12,7 +13,24 @@
 
 table {
   border-collapse: collapse;
-  height: inherit;
+  height: 100%;
+  width: 100%;
+
+  col {
+    width: calc((100% - (150px + 30px + 100px)) / 5);
+
+    &:first-child {
+      width: 30px;
+    }
+
+    &:nth-child(4) {
+      width: 150px;
+    }
+
+    &:last-child {
+      width: 100px;
+    }
+  }
 }
 
 thead {
@@ -33,6 +51,7 @@ tfoot {
 
 tbody {
   overflow-y: scroll;
+  height: 100%;
   max-height: 100%;
   border-left: 1px solid $gray-2;
   border-right: 1px solid $gray-2;

@@ -2,7 +2,6 @@ import { ACheckbox } from '../../atoms/ACheckbox/ACheckbox';
 import { Rating } from '../../atoms/Rating/Rating';
 import styles from './TableRow.module.scss';
 import { useHistory } from 'react-router-dom';
-import { AButton } from '../../atoms/AButton/AButton';
 import { useDispatch } from 'react-redux';
 import { deleteSongsThunk, setSongRatingThunk } from '../../../store/actions';
 
@@ -23,12 +22,16 @@ export const TableRow = ({
     history.push(`/songs/${id}`);
   };
 
-  const handleClickDeleteRow = (id) => {
-    dispatch(deleteSongsThunk([id]));
+  const handleClickDeleteRow = () => {
+    dispatch(deleteSongsThunk([{ id, name }]));
+  };
+
+  const handleClickEditRow = () => {
+    history.push(`/add-song/${id}`);
   };
 
   const handleSetSongRating = (event) => {
-    dispatch(setSongRatingThunk(id, +event.target.value));
+    dispatch(setSongRatingThunk(id, +event.target.value, name));
   };
 
   return (
@@ -50,8 +53,23 @@ export const TableRow = ({
         />
       </td>
       <td>{location}</td>
-      <td>
-        <AButton onClick={() => handleClickDeleteRow(id)}>Delete</AButton>
+      <td className={styles.actions}>
+        <button
+          className={styles.iconButton}
+          onClick={handleClickEditRow}
+          aria-label={`Edit ${name}`}
+          title="Edit"
+        >
+          <span aria-hidden="true">&#9998;</span>
+        </button>
+        <button
+          className={styles.iconButton}
+          onClick={handleClickDeleteRow}
+          aria-label={`Delete ${name}`}
+          title="Delete"
+        >
+          <span aria-hidden="true">&#10005;</span>
+        </button>
       </td>
     </tr>
   );

@@ -1,27 +1,27 @@
 import styles from './Pagination.module.scss';
 
 export const Pagination = ({ page, setPage, limit, setLimit, totalCount }) => {
-  const totalPageCount = Math.ceil(totalCount / limit);
+  const totalPages = totalCount && limit ? Math.ceil(totalCount / limit) : 0;
 
   const handleSetPage = (value) => {
     if (value < 1) return;
-    if (value > totalPageCount) return;
+    if (value > totalPages) return;
 
     setPage(value);
   };
 
-  const handleChangeInputPage = (event) => {
+  const handleChangePage = (event) => {
     handleSetPage(+event.target.value);
   };
 
-  const handleSetLimit = (event) => {
-    if (event.target.value < 1) return;
+  const handleChangeLimit = (event) => {
+    const nextLimit = event.target.value === 'all'
+      ? totalCount
+      : +event.target.value;
+    const nextPage = Math.min(page, Math.max(1, Math.ceil(totalCount / nextLimit)));
 
-    setLimit(+event.target.value);
-  };
-
-  const handlePreventSubmitEvent = (event) => {
-    event.preventDefault();
+    setLimit(nextLimit);
+    setPage(nextPage);
   };
 
   return (
@@ -37,36 +37,38 @@ export const Pagination = ({ page, setPage, limit, setLimit, totalCount }) => {
         </li>
       </ul>
       <div>
-        <form onSubmit={handlePreventSubmitEvent}>
-          <label>
-            Jump to page:
-            <input
-              min={1}
-              step={1}
-              onChange={handleChangeInputPage}
-              value={page}
-              type="number"
-            />
-          </label>
-        </form>
+        <label>
+          Jump to page:
+          <select value={page} onChange={handleChangePage}>
+            {Array.from({ length: Math.max(totalPages, 1) }, (_, index) => (
+              <option key={index + 1} value={index + 1}>
+                {index + 1}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
       <div>
-        <form onSubmit={handlePreventSubmitEvent}>
-          <label>
-            Limit items per page:
-            <input
-              min={1}
-              step={1}
-              onChange={handleSetLimit}
-              value={limit}
-              type="number"
-            />
-          </label>
-        </form>
+        <label>
+          Limit items per page:
+          <select
+            value={limit === totalCount ? 'all' : limit}
+            onChange={handleChangeLimit}
+          >
+            {[5, 10, 20, 50]
+              .filter((value, index, values) => value > 0 && values.indexOf(value) === index)
+              .map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            {!!totalCount && <option value="all">All</option>}
+          </select>
+        </label>
       </div>
       <p>
         Total pages:
-        {totalPageCount && <strong>{totalPageCount}</strong>}
+        {totalPages && <strong>{totalPages}</strong>}
       </p>
     </div>
   );
